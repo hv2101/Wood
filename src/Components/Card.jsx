@@ -1,6 +1,8 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import {format} from "timeago.js";
+import axios from "axios";
 
 const Container = styled.div`
   width: ${(props) => props.type !== "sm" && "360px"};
@@ -51,23 +53,33 @@ const Info = styled.div`
   color: ${({ theme }) => theme.textSoft};
 `;
 
-const Card = ({ type }) => {
+const Card = ({ type, video }) => {
+    const [channel, setChannel] = useState({});
+
+    useEffect(() => {
+        const fetchChannel = async () => {
+            const res = await axios.get(`/users/find/${video.userId}`);
+            setChannel(res.data);
+        };
+        fetchChannel();
+    }, [video.userId]);
+
     return (
-        <Link to = "/video/test" style = {{textDecoration:"none"}}>
+        <Link to = { `/video/${video._id}`} style = {{textDecoration:"none"}}>
         <Container type = {type}>
             <Image
                 type = { type }
-                src = "https://media.gettyimages.com/photos/pictured-matthew-perry-as-chandler-bing-jennifer-aniston-as-rachel-picture-id138425601?k=20&m=138425601&s=612x612&w=0&h=gCJk-0s3pVSbYdtmaQ2P2fNeG-gE4tfeiTxXzK6u3aw="
+                src = {video.imgUrl}
             />
             <Details type = { type }>
                 <ChannelImage
                     type = { type }
-                    src ="https://media.gettyimages.com/photos/the-cast-of-friends-clockwise-from-top-left-matt-leblanc-david-picture-id901156?s=2048x2048"
+                    src = {channel.img}
                 />
                 <Texts>
-                    <Title>Test Video</Title>
-                    <ChannelName>Friends</ChannelName>
-                    <Info>148,409 views  • 1 day ago</Info>
+                    <Title>{video.title}</Title>
+                    <ChannelName>{channel.name}</ChannelName>
+                    <Info>{video.views} views  • {format(video.createdAt)}</Info>
                 </Texts>
             </Details>
         </Container>
